@@ -1,0 +1,130 @@
+<html lang="en">
+  <head>
+    <meta charset="utf-8" /> <!--makes it possible to use emojis and other characters that aren't in the traditional ASCII-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Page - KickLab</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+  </head>
+  <body>
+
+    <div class="container-2">
+      <div class="navbar-2">
+        <div class="logo">
+          <img src="images/logo.png" width="125px">
+        </div>
+        <nav>
+          <ul id="MenuItems">
+            <li><a href="">Home</a></li>
+            <li><a href="">Products</a></li>
+            <li><a href="">About</a></li>
+            <li><a href="">Contact</a></li>
+            <li><a href="">Account</a></li>
+          </ul>
+        </nav>
+        <img src="images/cart.png" width="30px" height="30px">
+        <img src="images/menu.png" class="menu-icon" onclick="menutoggle()">
+     </div>
+    </div>
+
+<!----background for the product---->
+<div class="row-5">
+  <div class="col-8">
+      <h1>NIKE<br>SPORTS AIR</h1>
+      <p>The Nike Air Zoom Vomero 15 Is Back Updated Cushioning<br>
+          And A Tough Outsole For Transition.</p>
+      <h2>$150</h2>
+      <button type="button">ADD TO CART</button>
+  </div>
+  <div class="col-9">
+      <div class="feature-img">
+          <img src="images/nike.png" id="ProductImage" alt="Product Image">
+      </div>
+      <div class="small-img-row">
+          <img src="images/nike-b.png" width="100%" class="small-img" alt="Nike Image 1">
+          <img src="images/nike-s.png" width="100%" class="small-img" alt="Nike Image 2">
+          <img src="images/nike-b.png" width="100%" class="small-img" alt="Nike Image 3">
+          <img src="images/nike-g.png" width="100%" class="small-img" alt="Nike Image 4">
+      </div>
+      <h2>NIKE</h2>
+  </div>
+</div>
+
+
+
+
+<!----js for product gallery--->
+
+<script>
+  // Select the main product image
+  var ProductImage = document.getElementById("ProductImage");
+
+  // Select all small images
+  var SmallImg = document.getElementsByClassName("small-img");
+
+  // Loop through small images and add click event
+  for (let i = 0; i < SmallImg.length; i++) {
+      SmallImg[i].onclick = function () {
+          ProductImage.src = SmallImg[i].src; // Update the main image src
+      };
+  }
+</script>
+
+
+<!----footer---->
+
+<div class="footer">
+    <div class="container">
+      <div class="row">
+        <div class="footer-col-1">
+          <h3>Download Our App</h3>
+          <p>Download App for Android</p>
+          <div class="app-logo">
+            <img src="images/play-store.png">
+            <img src="images/app-store.png">
+          </div>
+        </div>
+        <div class="footer-col-2">
+          <img src="images/logo-white.png">
+          <p>Our Purpose is</p>
+        </div>
+        <div class="footer-col-3">
+          <h3>Useful Links</h3>
+          <ul>
+            <li>Coupons</li>
+            <li>Blog Post</li>
+            <li>Return Policy</li>
+            <li>Join Affiliates</li>
+          </ul>
+        </div>
+        <div class="footer-col-4">
+          <h3>Follow us</h3>
+          <ul>
+            <li>Facebook</li>
+            <li>Twitter</li>
+            <li>Instagram</li>
+            <li>YouTube</li>
+          </ul>
+        </div>
+      </div>
+      <hr>
+      <p class="copyright">Copyright 2020 - KickLab</p>
+    </div>
+  </div>
+  <!----js for toggle menu-->
+  <script>
+  var MenuItems = document.getElementById("MenuItems");
+
+  MenuItems.style.maxHeight = "0px";
+
+  function menutoggle() {
+      if (MenuItems.style.maxHeight === "0px") {
+          MenuItems.style.maxHeight = "200px";
+      } else {
+          MenuItems.style.maxHeight = "0px";
+      }
+  }
+  </script>
+    </body>
+    </html>
