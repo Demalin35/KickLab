@@ -1,0 +1,43 @@
+image: php:8.3-apache-bookworm
+
+pipelines:
+  pull-requests:
+    '**':
+      - step:
+          name: Static checks
+          image: php:8.3-apache-bookworm
+          caches:
+            - composer
+          services:
+            - docker
+          script:
+            # Provision certificates for cloning repos from GitHub and BitBucket
+            - mkdir -p ~/.ssh
+            - echo -n $SSH_AGENT_CONFIG | base64 -d > ~/.ssh/config
+            - echo -n $REPO_KEY | base64 -d > ~/.ssh/id_bitbucket_ed25519
+            - echo -n $GITHUB_KEY | base64 -d > ~/.ssh/id_github_ed25519
+            - chmod 600 ~/.ssh/id_bitbucket_ed25519
+            - chmod 600 ~/.ssh/id_github_ed25519
+            - eval $(ssh-agent -s)
+            - # Run linter checks
+            - echo "Running PHP 5.6 linter, skipping /vendor, /tests and /src/Commands";
+            - docker run -v $BITBUCKET_CLONE_DIR:/app --entrypoint=/bin/sh --workdir=/app php:5.6-alpine -c "find /app -type f -name '*.php' ! -path '/app/vendor/*' ! -path '/app/tests/*' ! -path '/app/src/Commands/*' -exec php -l -n {} \;" | (! grep -v 'No syntax errors detected')
+            - echo "Running PHP 8.1 linter, skipping /vendor";
+            - docker run -v $BITBUCKET_CLONE_DIR:/app --entrypoint=/bin/sh --workdir=/app php:8.1-alpine -c "find /app -type f -name '*.php' ! -path '/app/vendor/*' -exec php -l -n {} \;" | (! grep -v 'No syntax errors detected')
+            - apt-get update -y && apt-get install -y git unzip netcat-openbsd
+            - docker-php-ext-install pcntl
+            - pecl install -f -o brotli && docker-php-ext-enable brotli
+            - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+            # Run tests
+            - echo "Preparing test docker image"
+            - export COMPOSER_ALLOW_SUPERUSER=1
+            - composer prepare-test-image
+            # Make sure no-dev deps are able to install
+            - composer install -no --no-dev --no-progress --no-suggest --no-interaction
+            # Make sure dev deps are able to install
+            - composer install -no --no-progress --no-suggest --no-interaction
+            - echo "Running unit tests"
+            - composer run-unit-tests
+            - echo "Running feature tests"
+            - composer run-feature-tests
+

@@ -1,0 +1,46 @@
+{
+    "name": "nitropack/httpclient",
+    "type": "library",
+    "description": "HttpClient library written in PHP, without relying on cURL nor url_fopen",
+    "keywords": ["php", "http", "client", "library"],
+    "authors": [
+        {"name": "Ivailo Hristov"}
+    ],
+    "autoload": {
+        "psr-4": { "NitroPack\\HttpClient\\": "src/" }
+    },
+    "autoload-dev": {
+        "psr-4": { "Tests\\": "tests/" }
+    },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "git@bitbucket.org:nitropack/url.git"
+        }
+    ],
+    "scripts": {
+        "test": "composer prepare-test-image && composer run-unit-tests && composer run-feature-tests",
+        "prepare-test-image": "docker build -t nitropack-httpclient:latest .",
+        "run-unit-tests": "vendor/bin/phpunit --testdox --testsuite unit",
+        "run-feature-tests": "vendor/bin/phpunit --testsuite feature"
+    },
+    "require": {
+        "php": "^5.6|^7.0|^8.0",
+        "nitropack/url": "dev-master"
+    },
+    "require-dev": {
+        "ext-pcntl": "*",
+        "phpunit/phpunit": "^10",
+        "react/http": "^1.8",
+        "react/socket": "^1.12",
+        "symfony/console": "^6.4",
+        "symfony/process": "^6.4",
+        "symfony/var-dumper": "^6.4",
+        "monolog/monolog": "^3.6",
+        "shyim/testcontainer": "^0.1.4"
+    },
+    "recommend": {
+        "ext-brotli":  "If you want to use Brotli compression",
+        "ext-zlib":  "If you want to use GZIP compression"
+    }
+}
