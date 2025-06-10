@@ -418,7 +418,7 @@
     position: absolute;
     top: 0.5rem;
     right: 0.5rem;
-    z-index: 2;
+    z-index: 5;
 }
 
 .wishlist-icon i {
@@ -432,6 +432,14 @@
 .wishlist-icon i:hover {
     color: red; /* highlighted when active or hovered */
 }
-
-
-
+.new-collection-banner {
+    background-color: #b5c5a5; 
+}
+.new-collection-banner h2 {
+    color: #FFFFFF; 
+}
+.on-sale-banner {
+    background-color: #f1f1f1; 
+    padding: 20px; /* Optional, can adjust for spacing */
+    border-radius: 8px; /* Optional for rounding */
+}
