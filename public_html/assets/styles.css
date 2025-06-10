@@ -414,7 +414,24 @@
     display: none; /* Hide scrollbars */
   }
 }
+.wishlist-icon {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    z-index: 2;
+}
 
+.wishlist-icon i {
+    font-size: 24px;
+    color: #000; /* default icon color */
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.wishlist-icon i.active,
+.wishlist-icon i:hover {
+    color: red; /* highlighted when active or hovered */
+}
 
 
 

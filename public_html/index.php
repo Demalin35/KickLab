@@ -1,7 +1,31 @@
 <?php
 session_start();
 
-if (isset($_SESSION['success'])): ?>
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $action = $_POST['action'] ?? '';
+    $productId = intval($_POST['product_id'] ?? 0);
+
+    if ($productId <= 0) {
+        echo 'Invalid product ID';
+        exit;
+    }
+
+    if ($action === 'add') {
+        $_SESSION['wishlist'][$productId] = true;
+        echo 'Product added to wishlist';
+    } elseif ($action === 'remove') {
+        unset($_SESSION['wishlist'][$productId]);
+        echo 'Product removed from wishlist';
+    } else {
+        echo 'Invalid action';
+    }
+    exit; // VERY IMPORTANT: Don't render the rest of the page for AJAX calls
+}
+
+// Normal page rendering below
+?>
+
+<?php if (isset($_SESSION['success'])): ?>
     <div class="alert alert-success text-center">
         <?= $_SESSION['success']; unset($_SESSION['success']); ?>
     </div>
@@ -28,9 +52,67 @@ try {
 }
 
 
-// Fetch popular products
-$stmt = $pdo->query("SELECT id, brand, name, price, old_price, image_main, image_hover, color FROM products ORDER BY created_at DESC LIMIT 5");
-$popularProducts = $stmt->fetchAll(PDO::FETCH_ASSOC); 
+// $stmt = $pdo->query("SELECT id, brand, name, price, old_price, image_main, image_hover, color 
+//                     FROM products 
+//                     WHERE popular = 1 
+//                     ORDER BY created_at DESC 
+//                     LIMIT 5");
+// $popularProducts = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+
+$popularProducts = [
+    [
+        'id' => 12,
+        'brand' => 'Reebok',
+        'name' => 'Sneakers Club C Revenge',
+        'price' => 149.99,
+        'old_price' => 179.99,
+        'image_main' => 'assets/reebok.webp',
+        'image_hover' => 'assets/reebok2.webp',
+        'color' => '#E75480' // Pinkish
+    ],
+    [
+        'id' => 4,
+        'brand' => 'Nike',
+        'name' => 'Air Force 1',
+        'price' => 129.99,
+        'old_price' => 159.99,
+        'image_main' => 'assets/air-force-1.webp',
+        'image_hover' => 'assets/air-force-1-07-hq.webp',
+        'color' => '#FFFFFF'
+    ],
+    [
+        'id' => 9,
+        'brand' => 'Puma',
+        'name' => 'RS-X3',
+        'price' => 139.99,
+        'old_price' => 169.99,
+        'image_main' => 'assets/puma.webp',
+        'image_hover' => 'assets/puma2.webp',
+        'color' => '#EFEFEF'
+    ],
+    [
+        'id' => 17,
+        'brand' => 'Boss',
+        'name' => 'Jungle Runner',
+        'price' => 189.99,
+        'old_price' => 229.99,
+        'image_main' => 'assets/boss.webp',
+        'image_hover' => 'assets/boss2.webp',
+        'color' => '#000000'
+    ],
+    [
+        'id' => 25,
+        'brand' => 'Adidas',
+        'name' => 'Forum Low',
+        'price' => 159.99,
+        'old_price' => 199.99,
+        'image_main' => 'assets/adidas.webp',
+        'image_hover' => 'assets/adidas2.webp',
+        'color' => '#D2B48C'
+    ]
+];
+
 ?>
 
 <!DOCTYPE html>
@@ -108,36 +190,40 @@ $popularProducts = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <h4 class="mb-3">Popular Products</h4>
     <div class="row row-cols-1 row-cols-md-3 row-cols-lg-5 g-4">
         <?php foreach ($popularProducts as $product): ?>
-  <div class="col">
-      <div class="card product-card p-2 h-100 position-relative overflow-hidden">
-          <a href="product.php?id=<?= $product['id'] ?>" class="text-decoration-none text-dark">
-              <div class="product-image-wrapper position-relative">
-                  <img 
-                      src="<?= htmlspecialchars($product['image_main']) ?>" 
-                      class="card-img-top main-img" 
-                      alt="<?= htmlspecialchars($product['name']) ?>">
-                  <?php if (!empty($product['image_hover'])): ?>
-                  <img 
-                      src="<?= htmlspecialchars($product['image_hover']) ?>" 
-                      class="card-img-top hover-img" 
-                      alt="<?= htmlspecialchars($product['name']) ?>">
-                  <?php endif; ?>
-              </div>
-          </a>
-          <div class="card-body text-center">
-              <h6 class="fw-bold mb-1"><?= htmlspecialchars($product['brand']) ?></h6>
-              <p class="small text-muted mb-1"><?= htmlspecialchars($product['name']) ?></p>
-              <p class="text-danger fw-bold mb-0"><?= number_format($product['price'], 2) ?> USD.</p>
-              <?php if (!empty($product['old_price']) && $product['old_price'] > $product['price']): ?>
-              <p class="small text-muted">Old price <?= number_format($product['old_price'], 2) ?> USD.</p>
-              <?php endif; ?>
-              <div class="d-flex justify-content-center gap-1 mt-2">
-                  <div class="rounded-circle" style="width:12px; height:12px; background:<?= htmlspecialchars($product['color']) ?>;"></div>
-              </div>
-          </div>
-      </div>
-  </div>
-<?php endforeach; ?>
+        <div class="col">
+            <div class="card product-card p-2 h-100 position-relative overflow-hidden">
+                <a href="product.php?id=<?= htmlspecialchars($product['id']) ?>" class="text-decoration-none text-dark">
+                    <div class="product-image-wrapper position-relative">
+                        <img 
+                            src="<?= htmlspecialchars($product['image_main']) ?>" 
+                            class="card-img-top main-img" 
+                            alt="<?= htmlspecialchars($product['name']) ?>">
+                        <?php if (!empty($product['image_hover'])): ?>
+                        <img 
+                            src="<?= htmlspecialchars($product['image_hover']) ?>" 
+                            class="card-img-top hover-img" 
+                            alt="<?= htmlspecialchars($product['name']) ?>">
+                        <?php endif; ?>
+                    <!-- Wishlist Icon -->
+                        <div class="wishlist-icon position-absolute top-0 end-0 p-2">
+                            <i class="bi bi-heart" data-product-id="<?= $product['id'] ?>" style="font-size: 24px; cursor: pointer;"></i>
+                        </div>
+                    </div>
+                </a>
+                <div class="card-body text-center">
+                    <h6 class="fw-bold mb-1"><?= htmlspecialchars($product['brand']) ?></h6>
+                    <p class="small text-muted mb-1"><?= htmlspecialchars($product['name']) ?></p>
+                    <p class="text-danger fw-bold mb-0"><?= number_format($product['price'], 2) ?> USD.</p>
+                    <?php if (!empty($product['old_price']) && $product['old_price'] > $product['price']): ?>
+                    <p class="small text-muted">Old price <?= number_format($product['old_price'], 2) ?> USD.</p>
+                    <?php endif; ?>
+                    <div class="d-flex justify-content-center gap-1 mt-2">
+                        <div class="rounded-circle" style="width:12px; height:12px; background:<?= htmlspecialchars($product['color']) ?>;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <?php endforeach; ?>
     </div>
 </div>
 
@@ -248,33 +334,35 @@ $popularProducts = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-        const wishlistIcons = document.querySelectorAll(".wishlist-icon i");
+    const wishlistIcons = document.querySelectorAll(".wishlist-icon i");
 
-        wishlistIcons.forEach(icon => {
-            icon.addEventListener("click", function() {
-                const productId = this.getAttribute("data-product-id");
-                const isActive = this.classList.contains("bi-heart-fill");
-                const action = isActive ? "remove" : "add";
-                // Toggle icon class
+    wishlistIcons.forEach(icon => {
+        icon.addEventListener("click", function(event) {
+            event.preventDefault(); // prevent navigation if inside a link
+            const productId = this.getAttribute("data-product-id");
+            const isActive = this.classList.contains("active");
+            const action = isActive ? "remove" : "add";
 
-                this.classList.toggle("bi-heart-fill");
-                this.classList.toggle("text-danger");
-                this.classList.toggle("bi-heart");
+            // Toggle icon classes
+            this.classList.toggle("active");
+            this.classList.toggle("bi-heart-fill");
+            this.classList.toggle("bi-heart");
+            this.classList.toggle("text-danger");
 
-
-                // AJAX request to update wishlist
-                const xhr = new XMLHttpRequest();
-                xhr.open("POST", "wishlist-handler.php", true);
-                xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-                xhr.onload = function() {
-                    if (xhr.status === 200) {
-                        console.log(xhr.responseText);
-                    }
-                };
-                xhr.send("action=" + action + "&product_id=" + productId);
-            });
+            // AJAX request to index.php itself
+            const xhr = new XMLHttpRequest();
+            xhr.open("POST", "", true); // empty URL posts to the same file
+            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    console.log(xhr.responseText);
+                }
+            };
+            xhr.send("action=" + action + "&product_id=" + productId);
         });
     });
+});
+
 </script>
 
 <!-- Footer -->
