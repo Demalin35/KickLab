@@ -1,11 +1,7 @@
 <?php
 session_start();
+require_once 'config.php';
 
-// Database connection
-$host = 'localhost';
-$db = 'u638680811_ecommerce';
-$user = 'u638680811_Alina';
-$pass = '2012Dtlm!';
 
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$db", $user, $pass);

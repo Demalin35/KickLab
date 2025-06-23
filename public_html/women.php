@@ -1,11 +1,7 @@
 <?php
 session_start();
+require_once 'config.php';
 
-// DB config
-$host = 'localhost';
-$db = 'u638680811_ecommerce';
-$user = 'u638680811_Alina';
-$pass = '2012Dtlm!';
 
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$db", $user, $pass);
@@ -270,14 +266,11 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 </div>
 
                 <style>
-                    /* Style dropdown items with hover effect */
                     .dropdown-menu .dropdown-item:hover {
                         background-color: #d8edd5;
                         color: #000;
-                        /* black text for good contrast */
                     }
 
-                    /* Optional: style active item for consistency */
                     .dropdown-menu .dropdown-item.active,
                     .dropdown-menu .dropdown-item:active {
                         background-color: #d8edd5;
@@ -302,7 +295,7 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                         </span>
                                     </div>
                                 </a>
-                                <!-- 🔥 Buttons right under the product image -->
+
                                 <div class="d-flex justify-content-center gap-2 my-2">
                                     <button class="btn btn-sm btn-dark">Add to Cart</button>
                                     <button class="btn btn-sm btn-outline-danger">♡ Wishlist</button>
@@ -385,7 +378,7 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 </style>
 
 
-                <!-- Footer Description -->
+
                 <div class="mt-5 px-3">
                     <h5 class="fw-bold">What running shoes to choose? A quick guide</h5>
                     <p class="text-muted">

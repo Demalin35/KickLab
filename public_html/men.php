@@ -1,11 +1,8 @@
 <?php
 session_start();
+include 'nitropack-config.php';
+require_once 'config.php';
 
-// DB config
-$host = 'localhost';
-$db = 'u638680811_ecommerce';
-$user = 'u638680811_Alina';
-$pass = '2012Dtlm!';
 
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$db", $user, $pass);

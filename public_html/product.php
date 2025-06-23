@@ -1,11 +1,8 @@
 <?php
 session_start();
+include 'nitropack-config.php';
+require_once 'config.php';
 
-// Database connection
-$host = 'localhost';
-$db = 'u638680811_ecommerce';
-$user = 'u638680811_Alina';
-$pass = '2012Dtlm!';
 
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$db", $user, $pass);
@@ -14,64 +11,49 @@ try {
     die("DB Connection failed: " . $e->getMessage());
 }
 
-// Fetch product
-if (!isset($_GET['id'])) {
-    die("Product not found.");
-}
+$product = null;
+$products = [];
+$size = $_GET['size'] ?? null;
 
-$productId = intval($_GET['id']);
-$stmt = $pdo->prepare("SELECT * FROM products WHERE id = :id");
-$stmt->execute([':id' => $productId]);
-$product = $stmt->fetch(PDO::FETCH_ASSOC);
+// 🎯 View logic
+if (isset($_GET['id'])) {
+    $stmt = $pdo->prepare("SELECT * FROM products WHERE id = :id");
+    $stmt->execute([':id' => intval($_GET['id'])]);
+    $product = $stmt->fetch(PDO::FETCH_ASSOC);
 
-if (!$product) {
-    die("Product not found.");
-}
+    if (!$product)
+        die("Product not found.");
 
-// Parse images (main image + gallery)
-$product['imagePaths'] = [];
-if (!empty($product['image_main'])) {
-    $product['imagePaths'][] = trim($product['image_main']);
-}
-if (!empty($product['image_gallery'])) {
-    $galleryImages = explode(',', $product['image_gallery']);
-    foreach ($galleryImages as $img) {
-        $trimmedImg = trim($img);
-        if ($trimmedImg !== $product['image_main']) {
-            $product['imagePaths'][] = $trimmedImg;
+    // Images
+    $product['imagePaths'] = [];
+    if (!empty($product['image_main'])) {
+        $product['imagePaths'][] = trim($product['image_main']);
+    }
+    if (!empty($product['image_gallery'])) {
+        foreach (explode(',', $product['image_gallery']) as $img) {
+            $img = trim($img);
+            if ($img !== $product['image_main']) {
+                $product['imagePaths'][] = $img;
+            }
         }
     }
-}
 
-// Parse images and sizes
-$product['sizes'] = explode(',', $product['size']); // Updated: use the new sizes column
+    // Sizes
+    $product['sizes'] = array_map('trim', explode(',', $product['size'] ?? ''));
 
+} elseif (isset($_GET['brand'])) {
+    $brand = trim($_GET['brand']);
+    $stmt = $pdo->prepare("SELECT * FROM products WHERE brand = :brand");
+    $stmt->execute([':brand' => $brand]);
+    $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+} elseif ($size) {
+    $stmt = $pdo->prepare("SELECT * FROM products WHERE size LIKE :size");
+    $stmt->execute([':size' => '%' . $size . '%']);
+    $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Handle Add to Cart
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $selectedSize = $_POST["size"] ?? null;
-    $quantity = isset($_POST["quantity"]) ? (int) $_POST["quantity"] : 1;
-
-    if ($selectedSize) {
-        $cartItem = [
-            "id" => $product["id"],
-            "name" => $product["name"],
-            "price" => $product["price"],
-            "size" => $selectedSize,
-            "quantity" => $quantity,
-            "image" => trim($product["imagePaths"][0])
-        ];
-
-        if (!isset($_SESSION["cart"])) {
-            $_SESSION["cart"] = [];
-        }
-
-        $_SESSION["cart"][] = $cartItem;
-        $success = "Product added to cart successfully!";
-    } else {
-        $error = "Please select a size before adding to the cart.";
-    }
+} else {
+    die("No product or filter specified.");
 }
 ?>
 
@@ -169,6 +151,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             height: auto;
         }
 
+        /* Limit modal image size on larger screens */
+        @media (min-width: 992px) {
+            #imageModal .modal-dialog {
+                max-width: 600px;
+            }
+        }
+
         .product-info {
             background-color: #f5f5f5;
             padding: 15px;
@@ -176,6 +165,31 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         }
     </style>
 </head>
+<?php if (isset($_GET['id'])): ?>
+    <!-- Render full single product view -->
+<?php else: ?>
+    <!-- Render product grid -->
+    <h2 class="text-center my-5">All Products with Size <?= htmlspecialchars($size) ?></h2>
+    <div class="container my-5">
+        <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">
+            <?php foreach ($products as $p): ?>
+                <div class="col">
+                    <a href="product.php?id=<?= $p['id'] ?>" class="text-decoration-none">
+                        <div class="card h-100">
+                            <img src="<?= htmlspecialchars($p['image_main']) ?>" class="card-img-top"
+                                alt="<?= htmlspecialchars($p['name']) ?>">
+                            <div class="card-body">
+                                <h6><?= htmlspecialchars($p['brand']) ?></h6>
+                                <p><?= htmlspecialchars($p['name']) ?></p>
+                                <p class="text-danger fw-bold"><?= number_format($p['price'], 2) ?> USD</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+<?php endif; ?>
 
 <body>
 

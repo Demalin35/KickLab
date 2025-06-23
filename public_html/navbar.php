@@ -12,7 +12,7 @@ $user = $_SESSION['user'] ?? null;
         <img src="assets/logo.png" alt="Logo" style="width: 100px; height: auto;">
     </a>
 
-    <!-- ✅ MOBILE ICONS & TOGGLER (LEFT OF HAMBURGER) -->
+    <!-- MOBILE ICONS & TOGGLER -->
     <div class="d-flex align-items-center gap-3 d-lg-none ms-auto">
         <a href="wishlist.php"><i class="bi bi-heart fs-4"></i></a>
         <a href="account.php"><i class="bi bi-person fs-4"></i></a>
@@ -79,7 +79,7 @@ $user = $_SESSION['user'] ?? null;
 
 
 
-    <!-- ✅ Restored Account Block -->
+    <!-- Account Block -->
     <?php if (!$isLoggedIn): ?>
         <li class="nav-item me-3 position-relative account-container d-none d-lg-block">
             <a class="nav-link icon-link" href="#"><i class="bi bi-person"></i> Account</a>
@@ -93,7 +93,7 @@ $user = $_SESSION['user'] ?? null;
         </li>
     <?php endif; ?>
 
-    <!-- Cart block (already done correctly) -->
+    <!-- Cart block -->
     <li class="nav-item me-3 position-relative cart-container d-none d-lg-block">
         <a class="nav-link icon-link" href="cart.php" id="cartIcon">
             <i class="bi bi-cart"></i>
@@ -142,6 +142,57 @@ $user = $_SESSION['user'] ?? null;
 <link href="assets/styles.css" rel="stylesheet">
 
 <style>
+    .navbar-icons {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        font-family: 'Segoe UI', sans-serif;
+        font-size: 15px;
+    }
+
+    .navbar-icons a {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: #36344D;
+        font-weight: 500;
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+
+    .navbar-icons a:hover {
+        color: #2f7c3c;
+    }
+
+    .navbar-icons a i {
+        font-size: 20px;
+        transition: transform 0.3s ease, color 0.3s ease;
+    }
+
+    .navbar-icons a:hover i {
+        transform: scale(1.2);
+        color: #2f7c3c;
+    }
+
+    .navbar-icons .cart-count {
+        font-size: 13px;
+        color: #888;
+        margin-left: 4px;
+    }
+
+
+    .navbar-icons .cart-count {
+        font-size: 13px;
+        color: #888;
+        margin-left: 4px;
+    }
+
+    .navbar-nav .nav-link i {
+        margin-right: 6px;
+        font-size: 18px;
+        vertical-align: middle;
+    }
+
     .account-popup,
     .cart-popup {
         display: none;

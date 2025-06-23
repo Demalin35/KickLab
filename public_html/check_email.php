@@ -1,8 +1,6 @@
 <?php
-$host = 'localhost';
-$db = 'u638680811_ecommerce';
-$user = 'u638680811_Alina';
-$pass = '2012Dtlm!';
+require_once 'config.php';
+
 
 header('Content-Type: application/json');
 

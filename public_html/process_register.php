@@ -1,11 +1,7 @@
 <?php
 session_start();
+require_once 'config.php';
 
-// Database connection
-$host = 'localhost'; // update if using external DB
-$db = 'u638680811_ecommerce';
-$user = 'u638680811_Alina';
-$pass = '2012Dtlm!';
 
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$db", $user, $pass);
@@ -66,7 +62,7 @@ if (empty($errors)) {
         'email' => $email
     ];
 
-    // ✅ Show success message on homepage
+    // Show success message on homepage
     $_SESSION['success'] = 'Welcome, ' . $first_name . '! Your account has been created.';
 
     header('Location: index.php');

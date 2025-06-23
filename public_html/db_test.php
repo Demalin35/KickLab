@@ -1,8 +1,6 @@
 <?php
-$host = 'localhost';
-$db = 'u638680811_ecommerce';
-$user = 'u638680811_Alina';
-$pass = '2012Dtlm!'; // Replace with the actual password
+require_once 'config.php';
+
 
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$db", $user, $pass);

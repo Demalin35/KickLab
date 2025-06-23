@@ -8,7 +8,7 @@ $productPrice = 135.00;
 $productImage = "assets/terrex1.webp";
 
 $size = $_POST["size"] ?? null;
-$quantity = isset($_POST["quantity"]) ? (int) $_POST["quantity"] : 1;
+$quantity = isset($_POST["quantity"]) ? (int)$_POST["quantity"] : 1;
 
 if (!$size) {
     echo json_encode(["success" => false, "error" => "Size is required."]);

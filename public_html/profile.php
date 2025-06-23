@@ -6,6 +6,7 @@ if (!isset($_SESSION['user'])) {
 }
 
 $user = $_SESSION['user'];
+include 'nitropack-config.php';
 ?>
 
 <!DOCTYPE html>
@@ -25,7 +26,7 @@ $user = $_SESSION['user'];
         <div class="card p-4">
             <p><strong>Name:</strong> <?= htmlspecialchars($user['first_name'] . ' ' . $user['last_name']) ?></p>
             <p><strong>Email:</strong> <?= htmlspecialchars($user['email']) ?></p>
-            <!-- Add more fields if needed -->
+
         </div>
     </div>
 

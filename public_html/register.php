@@ -3,6 +3,7 @@ session_start();
 $errors = $_SESSION['errors'] ?? [];
 $success = $_SESSION['success'] ?? '';
 unset($_SESSION['errors'], $_SESSION['success']);
+include 'nitropack-config.php';
 ?>
 <!DOCTYPE html>
 <html lang="bg">

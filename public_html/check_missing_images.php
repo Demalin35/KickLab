@@ -1,13 +1,8 @@
 <?php
-// check_missing_images.php
+require_once 'config.php';
 
 session_start();
 
-// DB config
-$host = 'localhost';
-$db = 'u638680811_ecommerce';
-$user = 'u638680811_Alina';
-$pass = '2012Dtlm!';
 
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$db", $user, $pass);
@@ -16,7 +11,6 @@ try {
     die("DB Connection failed: " . $e->getMessage());
 }
 
-// Fetch all products
 $stmt = $pdo->query("SELECT id, name, image_main, image_hover FROM products");
 $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 

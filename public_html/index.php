@@ -1,6 +1,20 @@
 <?php
 session_start();
+include 'nitropack-config.php';
+require_once 'config.php';
 
+
+
+
+// Connect to the database 
+try {
+    $pdo = new PDO("mysql:host=$host;dbname=$db", $user, $pass);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch (PDOException $e) {
+    die("DB Connection failed: " . $e->getMessage());
+}
+
+// Wishlist functionality
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
     $productId = intval($_POST['product_id'] ?? 0);
@@ -19,102 +33,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         echo 'Invalid action';
     }
-    exit; // VERY IMPORTANT: Don't render the rest of the page for AJAX calls
+    exit;
 }
 
-// Normal page rendering below
-?>
-
-<?php if (isset($_SESSION['success'])): ?>
-    <div class="alert alert-success text-center">
-        <?= $_SESSION['success'];
-        unset($_SESSION['success']); ?>
-    </div>
-<?php endif; ?>
-
-<?php
-define("NITROPACK_HOME_URL", "dodgerblue-loris-317943.hostingersite.com");
-define("NITROPACK_SITE_ID", "ClBFIUiICYPgzifeGhlaVuVWbXJSpRac");
-define("NITROPACK_SITE_SECRET", "HLvp1udUikpktvxsI5ofUsEMY2KmLFmz863o46cPySycUq9V8R3DzQoaaUAxnfky");
-include_once $_SERVER['DOCUMENT_ROOT'] . "/third_party/nitropack-sdk/bootstrap.php";
-
-
-// Connect to the database to fetch homepage products
-$host = 'localhost';
-$db = 'u638680811_ecommerce';
-$user = 'u638680811_Alina';
-$pass = '2012Dtlm!';
-
+// Popular products
 try {
-    $pdo = new PDO("mysql:host=$host;dbname=$db", $user, $pass);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $stmt = $pdo->query("
+    SELECT id, brand, name, price, old_price, image_main, image_hover, color 
+    FROM products 
+    WHERE popular = 1 
+    ORDER BY id DESC 
+    LIMIT 5
+");
+    $popularProducts = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
-    die("DB Connection failed: " . $e->getMessage());
+    die("Failed to fetch popular products: " . $e->getMessage());
 }
 
-
-// $stmt = $pdo->query("SELECT id, brand, name, price, old_price, image_main, image_hover, color 
-//                     FROM products 
-//                     WHERE popular = 1 
-//                     ORDER BY created_at DESC 
-//                     LIMIT 5");
-// $popularProducts = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-
-$popularProducts = [
-    [
-        'id' => 12,
-        'brand' => 'Reebok',
-        'name' => 'Sneakers Club C Revenge',
-        'price' => 149.99,
-        'old_price' => 179.99,
-        'image_main' => 'assets/reebok.webp',
-        'image_hover' => 'assets/reebok2.webp',
-        'color' => '#E75480' // Pinkish
-    ],
-    [
-        'id' => 4,
-        'brand' => 'Nike',
-        'name' => 'Air Force 1',
-        'price' => 129.99,
-        'old_price' => 159.99,
-        'image_main' => 'assets/air-force-1.webp',
-        'image_hover' => 'assets/air-force-1-07-hq.webp',
-        'color' => '#FFFFFF'
-    ],
-    [
-        'id' => 9,
-        'brand' => 'Puma',
-        'name' => 'RS-X3',
-        'price' => 126.00,
-        'old_price' => 178.99,
-        'image_main' => 'assets/pumars.webp',
-        'image_hover' => 'assets/pumars-hover.webp',
-        'color' => '#EFEFEF'
-    ],
-    [
-        'id' => 17,
-        'brand' => 'Boss',
-        'name' => 'Aiden',
-        'price' => 189.00,
-        'old_price' => 259.99,
-        'image_main' => 'assets/bossaiden.webp',
-        'image_hover' => 'assets/bossaiden-hover.webp',
-        'color' => '#000000'
-    ],
-    [
-        'id' => 25,
-        'brand' => 'Adidas',
-        'name' => 'Treziod',
-        'price' => 159.00,
-        'old_price' => 179.99,
-        'image_main' => 'assets/Treziod.webp',
-        'image_hover' => 'assets/Treziod-hover.webp',
-        'color' => '#D2B48C'
-    ]
-];
-
+// Lastly Added Products
+try {
+    $stmt = $pdo->query("
+        SELECT id, brand, name, price, old_price, image_main, image_hover, color 
+        FROM products 
+        ORDER BY created_at DESC 
+        LIMIT 5
+    ");
+    $lastlyAddedProducts = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    die("Failed to fetch lastly added products: " . $e->getMessage());
+}
 ?>
+
 
 <!DOCTYPE html>
 <html lang="bg">
@@ -197,7 +146,7 @@ $popularProducts = [
                 <p class="mt-2">for spent min. 169 USD for selected products until 04.05.</p>
             </div>
             <div class="col-md-6">
-                <img src="assets/hero-shoes.jpg" class="img-fluid" alt="Promo Shoes">
+                <img src="assets/hero-shoes.jpg" class="img-fluid hero-rotate" alt="Promo Shoes">
             </div>
         </div>
     </div>
@@ -271,44 +220,74 @@ $popularProducts = [
         </div>
     </div>
 
-    <!-- New Section - Categories -->
-    <div class="container my-5">
-        <h4 class="mb-3">Inspire Yourself from the Spring Hits</h4>
-        <div class="d-flex justify-content-center mb-4">
-            <a href="women.php" class="me-3 text-dark fw-bold">Women</a>
-            <a href="men.php" class="me-3 text-dark">Men</a>
-            <a href="kids.php" class="text-dark">Kids</a>
-        </div>
-        <div class="row row-cols-2 row-cols-md-4 row-cols-lg-5 g-4">
-            <?php
-            $categories = [
-                ['id' => 1, 'name' => 'Asics', 'image' => 'assets/asics.webp', 'link' => 'category.php?id=1'],
-                ['id' => 2, 'name' => 'Calvin Klein', 'image' => 'assets/calvinklein.webp', 'link' => 'category.php?id=2'],
-                ['id' => 3, 'name' => 'Tommy Hilfiger', 'image' => 'assets/tommyhilfiger.webp', 'link' => 'category.php?id=3'],
-                ['id' => 4, 'name' => 'New Balance', 'image' => 'assets/snickers.webp', 'link' => 'category.php?id=4'],
-                ['id' => 5, 'name' => 'Skechers', 'image' => 'assets/skechers.webp', 'link' => 'category.php?id=5'],
-                ['id' => 6, 'name' => 'Quicksilver', 'image' => 'assets/quicksilver.webp', 'link' => 'category.php?id=6'],
-                ['id' => 7, 'name' => 'Loafers', 'image' => 'assets/loafers.webp', 'link' => 'category.php?id=7'],
-                ['id' => 8, 'name' => 'HUGO', 'image' => 'assets/hugo.webp', 'link' => 'category.php?id=8'],
-                ['id' => 9, 'name' => 'Calvin Klein', 'image' => 'assets/covers.webp', 'link' => 'category.php?id=9'],
-                ['id' => 10, 'name' => 'Converse', 'image' => 'assets/converse.webp', 'link' => 'category.php?id=10'],
-            ];
 
-            foreach ($categories as $category): ?>
+    <!-- Lastly Added Section -->
+    <div class="container my-5">
+        <h4 class="mb-3">Lastly Added</h4>
+        <div class="row row-cols-1 row-cols-md-3 row-cols-lg-5 g-4">
+            <?php foreach ($lastlyAddedProducts as $product): ?>
                 <div class="col">
-                    <a href="<?php echo $category['link']; ?>" class="text-decoration-none">
-                        <div class="card category-card">
-                            <img src="<?php echo $category['image']; ?>" class="card-img-top"
-                                alt="<?php echo $category['name']; ?>">
-                            <div class="card-body text-center">
-                                <h6 class="card-title"><?php echo $category['name']; ?></h6>
+                    <div class="card product-card p-2 h-100 position-relative overflow-hidden">
+                        <a href="product.php?id=<?= htmlspecialchars($product['id']) ?>"
+                            class="text-decoration-none text-dark">
+                            <div class="product-image-wrapper position-relative">
+                                <img src="<?= htmlspecialchars($product['image_main']) ?>" class="card-img-top main-img"
+                                    alt="<?= htmlspecialchars($product['name']) ?>">
+                                <?php if (!empty($product['image_hover'])): ?>
+                                    <img src="<?= htmlspecialchars($product['image_hover']) ?>" class="card-img-top hover-img"
+                                        alt="<?= htmlspecialchars($product['name']) ?>">
+                                <?php endif; ?>
+                                <div class="wishlist-icon position-absolute top-0 end-0 p-2">
+                                    <i class="bi bi-heart" data-product-id="<?= $product['id'] ?>"
+                                        style="font-size: 24px; cursor: pointer;"></i>
+                                </div>
+                            </div>
+                        </a>
+                        <div class="card-body text-center">
+                            <h6 class="fw-bold mb-1"><?= htmlspecialchars($product['brand']) ?></h6>
+                            <p class="small text-muted mb-1"><?= htmlspecialchars($product['name']) ?></p>
+                            <p class="text-danger fw-bold mb-0"><?= number_format($product['price'], 2) ?> USD.</p>
+                            <?php if (!empty($product['old_price']) && $product['old_price'] > $product['price']): ?>
+                                <p class="small text-muted">Old price <?= number_format($product['old_price'], 2) ?> USD.</p>
+                            <?php endif; ?>
+                            <div class="d-flex justify-content-center gap-1 mt-2">
+                                <div class="rounded-circle"
+                                    style="width:12px; height:12px; background:<?= htmlspecialchars($product['color']) ?>;">
+                                </div>
                             </div>
                         </div>
-                    </a>
+                    </div>
                 </div>
             <?php endforeach; ?>
         </div>
     </div>
+
+
+    <!-- Choose a Size Section -->
+
+    <div class="container my-5">
+        <div class="row align-items-center bg-light p-4 rounded">
+            <!-- Left side: Size slider -->
+            <div class="col-md-6">
+                <h2 class="mb-3">Choose your size</h2>
+                <input type="range" id="sizeSlider" min="0" max="16" step="1" value="0" class="form-range mb-3">
+                <div class="mb-3">
+                    <span id="selectedSize" class="fw-bold fs-4">37</span>
+                </div>
+                <a id="viewModelsLink" href="product-list-view.php?size=37" class="btn btn-dark">
+                    SEE ALL MODELS WITH SIZE <span id="buttonSize">37</span>
+                </a>
+            </div>
+
+            <!-- Right side: Shoe image -->
+            <div class="col-md-6 text-center">
+                <img src="assets/floating.png" id="shoeImage" class="img-fluid rounded" alt="Shoe Image"
+                    style="max-width: 700px;">
+            </div>
+        </div>
+    </div>
+
+
 
     <!-- On Sale -->
     <div class="container my-5">
@@ -374,7 +353,7 @@ $popularProducts = [
 
             wishlistIcons.forEach(icon => {
                 icon.addEventListener("click", function (event) {
-                    event.preventDefault(); // prevent navigation if inside a link
+                    event.preventDefault();
                     const productId = this.getAttribute("data-product-id");
                     const isActive = this.classList.contains("active");
                     const action = isActive ? "remove" : "add";
@@ -387,7 +366,7 @@ $popularProducts = [
 
                     // AJAX request to index.php itself
                     const xhr = new XMLHttpRequest();
-                    xhr.open("POST", "", true); // empty URL posts to the same file
+                    xhr.open("POST", "", true);
                     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
                     xhr.onload = function () {
                         if (xhr.status === 200) {
@@ -399,9 +378,69 @@ $popularProducts = [
             });
         });
 
+        document.addEventListener("DOMContentLoaded", function () {
+            const sizeSlider = document.getElementById('sizeSlider');
+            const selectedSize = document.getElementById('selectedSize');
+            const buttonSize = document.getElementById('buttonSize');
+            const viewModelsLink = document.getElementById('viewModelsLink');
+
+            const sizes = [
+                "37", "38 1/3", "39", "39 1/3", "40", "40 2/3",
+                "41 1/3", "42", "42 2/3", "43 1/3", "44", "44 2/3",
+                "45 1/3", "46", "46 2/3", "47 1/3", "48"
+            ];
+
+            sizeSlider.addEventListener('input', function () {
+                const index = parseInt(this.value);
+                const size = sizes[index];
+                selectedSize.textContent = size;
+                buttonSize.textContent = size;
+                viewModelsLink.href = `product-list-view.php?size=${encodeURIComponent(size)}`;
+            });
+        });
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const isHomepage = window.location.pathname.includes("index.php") || window.location.pathname === "/";
+
+            const popupShown = localStorage.getItem("newsletter_shown");
+            const popup = document.getElementById("newsletterPopup");
+            const closeBtn = document.getElementById("closeNewsletter");
+            const form = document.getElementById("newsletterForm");
+
+            if (isHomepage && !popupShown) {
+                setTimeout(() => {
+                    popup.style.display = "flex";
+                }, 1500);
+            }
+
+            closeBtn.addEventListener("click", function () {
+                popup.style.display = "none";
+                localStorage.setItem("newsletter_shown", "true");
+            });
+
+            form.addEventListener("submit", function (e) {
+                e.preventDefault();
+                alert("Thanks for subscribing!");
+                popup.style.display = "none";
+                localStorage.setItem("newsletter_shown", "true");
+            });
+        });
+
     </script>
 
-    <!-- Footer -->
+    <!-- Newsletter Popup -->
+    <div id="newsletterPopup" class="newsletter-modal">
+        <div class="newsletter-content">
+            <button id="closeNewsletter" class="close-btn">&times;</button>
+            <h2>Join Our Newsletter</h2>
+            <p>Be the first to know about new arrivals, sales, and more.</p>
+            <form id="newsletterForm">
+                <input type="email" name="email" required placeholder="Enter your email" class="form-control mb-2">
+                <button type="submit" class="btn btn-dark w-100">Subscribe</button>
+            </form>
+        </div>
+    </div>
+
     <?php include 'footer.php'; ?>
 
 </body>
